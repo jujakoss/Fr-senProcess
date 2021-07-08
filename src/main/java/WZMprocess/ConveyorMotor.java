@@ -1,21 +1,25 @@
 package WZMprocess;
 
+
+
 public class ConveyorMotor implements IMotor {
-
-	private boolean isMoving = true;
-
+	private boolean isActive = false;
+ 
+	public void activate() {
+		if (!isActive) {
+			System.out.println("Conveyor: activated");
+			isActive = true;
+		}
+	}
+ 
+	public void deactivate() {
+		if (isActive) {
+			System.out.println("Conveyor: deactivated");
+			isActive = false;
+		}
+	}
+ 
 	public boolean readStatus() {
-		return isMoving;
-	}
-
-	@Override
-	public void start() {
-		isMoving = true;		
-	}
-
-	@Override
-	public void stop() {
-		isMoving = false;
-		
+		return isActive;
 	}
 }

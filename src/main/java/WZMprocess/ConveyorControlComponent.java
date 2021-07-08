@@ -8,16 +8,17 @@ import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class conveyorControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
+public class ConveyorControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(conveyorControlComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConveyorControlComponent.class);
 
 	public static final String OPMODE_BASIC = "BSTATE";
-	public static final String OPMODE_OP = "SENSOR_STATUS_CHANGED"; // sensor detected an element
+	public static final Object OP_MODE_OBJ_DETECTED = "ACTION_Bauteil_IN";
+	public static final Object OPMODE_OBJ_OUT = "ACTION_Bauteil_OUT";
 
 	private IConveyor conveyor;
 
-	public conveyorControlComponent(Conveyor conveyor) {
+	public ConveyorControlComponent(Conveyor conveyor) {
 		this.conveyor = conveyor;
 		addControlComponentChangeListener(this);
 	}
@@ -26,7 +27,7 @@ public class conveyorControlComponent extends SimpleControlComponent implements 
 	public void onChangedExecutionState(ExecutionState newExecutionState) {
 		logger.info("conveyorControlComponent: new execution state: " + newExecutionState);
 		if (newExecutionState == ExecutionState.EXECUTE) {
-			if (this.getOperationMode().equals(OPMODE_OP)) {
+			if (this.getOperationMode().equals(OP_MODE_OBJ_DETECTED)) {
 				controlMotor();
 			} else {
 				setExecutionState(ExecutionState.COMPLETE.getValue());
@@ -40,9 +41,10 @@ public class conveyorControlComponent extends SimpleControlComponent implements 
 
 		new Thread(() -> {
 			if (conveyor.getSensor().readStatus()) {
-				conveyor.getMotor().stop();
+				conveyor.getMotor().activate();
+
 			} else {
-				conveyor.getMotor().start();
+				conveyor.getMotor().deactivate();
 			}
 		}).start();
 

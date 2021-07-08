@@ -4,8 +4,8 @@ public interface IMotor {
 	
 	boolean readStatus();
 	
-	void start();
+	void activate();
 	
-	void stop();
+	void deactivate();
 	 
 }
