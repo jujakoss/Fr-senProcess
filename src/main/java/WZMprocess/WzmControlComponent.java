@@ -8,16 +8,16 @@ import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class wzmControlComponent extends SimpleControlComponent implements ControlComponentChangeListener  {
+public class WzmControlComponent extends SimpleControlComponent implements ControlComponentChangeListener  {
 	private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory.getLogger(wzmControlComponent.class);
+    private static final Logger logger = LoggerFactory.getLogger(WzmControlComponent.class);
 
 public static final String OPMODE_BASIC = "BSTATE";
 public static final String OPMODE_OP_EXE = "EXECUTE_SERVICE"; /* to fix #### */
 
 private Iwzm wzm;
 
-public wzmControlComponent(Iwzm wzm) {
+public WzmControlComponent(Iwzm wzm) {
 	this.wzm = wzm;
 	addControlComponentChangeListener(this);
 }

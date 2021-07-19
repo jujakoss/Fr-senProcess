@@ -8,41 +8,47 @@ import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConveyorControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
+public class RoboterControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(ConveyorControlComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(RoboterControlComponent.class);
 
 	//public static final String OPMODE_BASIC = "BSTATE";
-	public static final Object OPMODE_SENSOR_BLOCKED = "ACTION_Bauteil_IN";
-	public static final Object OPMODE_SENSOR_FREE = "ACTION_Bauteil_OUT";
+	public static final Object OPMODE_LOAD = "LOADING_PIECE";
+	public static final Object OPMODE_UNLOAD= "UNLOADING_PIECE";
 
-	private IConveyor conveyor;
+	private IRoboter roboter;
 
-	public ConveyorControlComponent(Conveyor conveyor) {
-		this.conveyor = conveyor;
+	public RoboterControlComponent(Roboter roboter) {
+		this.roboter = roboter;
 		addControlComponentChangeListener(this);
 	}
 
+	
+	
 	@Override
 	public void onChangedExecutionState(ExecutionState newExecutionState) {
-		logger.info("conveyorControlComponent: new execution state: " + newExecutionState);
+		logger.info("roboterControlComponent: new execution state: " + newExecutionState);
 		if (newExecutionState == ExecutionState.EXECUTE) {
-			if (this.getOperationMode().equals(OPMODE_SENSOR_BLOCKED)) {
-				stopMotor();
-			} else if (this.getOperationMode().equals(OPMODE_SENSOR_FREE)) {
-				startMotor();
+			if (this.getOperationMode().equals(OPMODE_LOAD)) {
+				loadBt();
+			} else if (this.getOperationMode().equals(OPMODE_UNLOAD)) {
+				unloadBt();
 				setExecutionState(ExecutionState.COMPLETE.getValue());
 			}
 		}
 	}
 
-	protected void startMotor() {
-		new Thread(() -> { conveyor.getMotor().activate(); } 
+	
+	
+	
+	
+	protected void loadBt() {
+		new Thread(() -> { roboter.getTask().load(); } 
 		).start();
 	}
 	
-	protected void stopMotor() {
-		new Thread(() -> { conveyor.getMotor().deactivate(); } 
+	protected void unloadBt() {
+		new Thread(() -> { roboter.getTask().unload(); } 
 		).start();
 	}
 

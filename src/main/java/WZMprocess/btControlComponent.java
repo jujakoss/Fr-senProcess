@@ -13,7 +13,7 @@ public class btControlComponent  extends SimpleControlComponent implements Contr
     private static final Logger logger = LoggerFactory.getLogger(btControlComponent.class);
 
 public static final String OPMODE_BASIC = "BSTATE";
-public static final String OPMODE_OP = "OP"; /* to fix #### */
+public static final String OPMODE_OP = "OP"; 
 
 private Bauteil bauteil;
 
@@ -27,16 +27,16 @@ public void onChangedExecutionState(ExecutionState newExecutionState) {
 	logger.info("bauteilControlComponent: new execution state: " + newExecutionState);
 	if (newExecutionState == ExecutionState.EXECUTE) {
 		if (this.getOperationMode().equals(OPMODE_OP)) {
-			controlMotor();
+			//controlMotor();
 		} else {
 			setExecutionState(ExecutionState.COMPLETE.getValue());
 		}
 	}
 }
 
-protected void controlMotor() {
+protected void operation() {
 
-/* operations to control the Motor */
+/* operations */
 	
 }
 
