@@ -89,7 +89,6 @@ public class AssetASConveyor {
 		
 		// Create an operation that uses the control component to stop the conveyor
 		Function<Object[], Object> opInvokable = (params) -> {
-			// From: HandsOn 04
 			// Connect to the control component
 			VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
  
@@ -202,9 +201,8 @@ public class AssetASConveyor {
 		Conveyor conveyorOne = new Conveyor();
 		startMyControlComponent(conveyorOne);
 		startMyAssetAdministrationShell(conveyorOne);
-		
 		// Return a AASHTTPRegistryProxy for the registry on localhost at port 4000
-		IAASRegistry registry = new AASRegistryProxy("http://localhost:4000/handson/registry");
+		IAASRegistry registry = new AASRegistryProxy("http://localhost:4000/wzm/registry");
  
 		// Create a ConnectedAssetAdministrationShell using a ConnectedAssetAdministrationShellManager
 		IConnectorFactory connectorFactory = new HTTPConnectorFactory();
@@ -231,11 +229,11 @@ public class AssetASConveyor {
 	
 
 	
-// - AAS: http://localhost:4000/handson/conveyor/aas/
-// - Sensor Submodel: http://localhost:4000/handson/conveyor/aas/submodels/Sensor/
-// - Control(Motor) Submodel: http://localhost:4000/handson/conveyor/aas/submodels/Control/
-// - Show all AAS: http://localhost:4000/handson/registry/api/v1/registry/
-// - Show my AAS: http://localhost:4000/handson/registry/api/v1/registry/urn:org.eclipse.basyx:ConveyorAAS
+// - AAS: http://localhost:4000/wzm/conveyor/aas/
+// - Sensor Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Sensor/
+// - Control(Motor) Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Control/
+// - Show all AAS: http://localhost:4000/wzm/registry/api/v1/registry/
+// - Show my AAS: http://localhost:4000/wzm/registry/api/v1/registry/urn:org.eclipse.basyx:ConveyorAAS
 
 // End of script
 
