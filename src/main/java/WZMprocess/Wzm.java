@@ -10,7 +10,7 @@ public class Wzm implements Iwzm {
 		try {
 			state = State.WORKING;
 			Thread.sleep(1000);
-			state = State.FREE;
+			state = State.READY;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

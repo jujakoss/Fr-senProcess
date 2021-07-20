@@ -12,9 +12,8 @@ public class ConveyorControlComponent extends SimpleControlComponent implements 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ConveyorControlComponent.class);
 
-	//public static final String OPMODE_BASIC = "BSTATE";
-	public static final Object OPMODE_SENSOR_BLOCKED = "ACTION_Bauteil_IN";
-	public static final Object OPMODE_SENSOR_FREE = "ACTION_Bauteil_OUT";
+	// public static final String OPMODE_BASIC = "BSTATE";
+	public static final Object OPMODE_SENSOR = "CONVEYOR_ON_OFF";
 
 	private IConveyor conveyor;
 
@@ -27,23 +26,26 @@ public class ConveyorControlComponent extends SimpleControlComponent implements 
 	public void onChangedExecutionState(ExecutionState newExecutionState) {
 		logger.info("conveyorControlComponent: new execution state: " + newExecutionState);
 		if (newExecutionState == ExecutionState.EXECUTE) {
-			if (this.getOperationMode().equals(OPMODE_SENSOR_BLOCKED)) {
-				stopMotor();
-			} else if (this.getOperationMode().equals(OPMODE_SENSOR_FREE)) {
-				startMotor();
-				setExecutionState(ExecutionState.COMPLETE.getValue());
+			if (this.getOperationMode().equals(OPMODE_SENSOR)) {
+				controlMotor();
 			}
+			setExecutionState(ExecutionState.COMPLETE.getValue());
 		}
 	}
 
-	protected void startMotor() {
-		new Thread(() -> { conveyor.getMotor().activate(); } 
-		).start();
-	}
-	
-	protected void stopMotor() {
-		new Thread(() -> { conveyor.getMotor().deactivate(); } 
-		).start();
+	protected void controlMotor() {
+		new Thread(() -> {
+
+			if (conveyor.getSensor().readStatus() == true) {
+				conveyor.getMotor().deactivate();
+			}
+
+			else {
+				conveyor.getMotor().activate();
+			}
+			conveyor.getMotor().deactivate();
+			setExecutionState(ExecutionState.COMPLETE.getValue());
+		}).start();
 	}
 
 	@Override
