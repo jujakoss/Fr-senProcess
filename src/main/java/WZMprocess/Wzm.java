@@ -6,8 +6,9 @@ public class Wzm implements Iwzm {
 
 	@Override
 	public void executeService() {
-		// do stuff
+		// testing Fräsen Operation as an excuted service
 		try {
+			//random testing scenario 
 			state = State.WORKING;
 			Thread.sleep(1000);
 			state = State.READY;

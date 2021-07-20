@@ -39,31 +39,31 @@ public class RoboterControlComponent extends SimpleControlComponent implements C
 		}
 	}
 
-	
 	protected void moveBt() {
-		
+
 		new Thread(() -> {
 
-			if (conveyor.getSensor().readStatus() == true ||wzm.State == READY) // use multiple
-																									// variables for the
-																									// state of the WZM
-			{
-				roboter.getTask().load();
-				logger.info("Loading component");
-			}
+			switch (wzm.getState()) {
+			case READY:
+				if (conveyor.getSensor().readStatus() == true) {
+					roboter.getTask().load();
+					logger.info("Loading component");
+				}
 
-			else if (conveyor.getSensor().readStatus() == false || wzm.getSensor().readStatus() == WORKING) {
-				logger.info("Waiting for a Component ... ");
-			}
+			case WORKING:
+				if (conveyor.getSensor().readStatus() == true) {
+					logger.info("Machine tool is occupied");
+				}
 
-			else if (wzm.getSensor().readStatus() == WORKING) {
-				logger.info("Machine tool is occupied");
-			}
-
-			else if (wzm.getSensor().readStatus() == OUT_OF_ORDER) {
+			case OUT_OF_ORDER:
 				logger.warn("Machine tool is out out of order !");
+				break;
+
+			default:
+				logger.warn("Waiting for a component ...");
+				break;
 			}
-			
+
 		}).start();
 	}
 

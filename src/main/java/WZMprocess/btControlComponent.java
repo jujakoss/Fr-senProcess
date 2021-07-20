@@ -27,7 +27,7 @@ public void onChangedExecutionState(ExecutionState newExecutionState) {
 	logger.info("bauteilControlComponent: new execution state: " + newExecutionState);
 	if (newExecutionState == ExecutionState.EXECUTE) {
 		if (this.getOperationMode().equals(OPMODE_OP)) {
-			//controlMotor();
+			operation();
 		} else {
 			setExecutionState(ExecutionState.COMPLETE.getValue());
 		}

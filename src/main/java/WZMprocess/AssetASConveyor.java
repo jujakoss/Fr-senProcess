@@ -88,23 +88,10 @@ public class AssetASConveyor {
 			// Connect to the control component
 			VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
  
-			// Select the first operation from the control component
-			proxy.setValue("status/opMode", ConveyorControlComponent.OPMODE_SENSOR_BLOCKED);
- 
-			// Start the control component operation asynchronous
-			proxy.invokeOperation("/operations/service/start");
- 
-			// Wait until the operation is completed
-			while (!proxy.getValue("status/exState").equals(ExecutionState.COMPLETE.getValue())) {
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
-			}
 			
 			
-			// Select the second operation from the control component
-			proxy.setValue("status/opMode", ConveyorControlComponent.OPMODE_SENSOR_FREE);
+			// Select the operation from the control component
+			proxy.setValue("status/opMode", ConveyorControlComponent.OPMODE_SENSOR);
  
 			// Start the control component operation asynchronous
 			proxy.invokeOperation("/operations/service/start");

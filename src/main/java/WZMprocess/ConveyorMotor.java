@@ -19,7 +19,7 @@ public class ConveyorMotor implements IMotor {
 		}
 	}
  
-	public boolean readStatus() {
+	public boolean motorStatus() {
 		return isActive;
 	}
 }

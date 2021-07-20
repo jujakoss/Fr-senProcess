@@ -67,14 +67,14 @@ public class AssetASRoboter {
 			
 			Submodel taskSubModel = new Submodel("Task", new ModelUrn("urn:org.eclipse.basyx:TaskSubmodel"));
 			
-			// Create an operation that uses the control component to stop the roboter
+			// Create an operation that uses the control component to move the roboter
 			Function<Object[], Object> opInvokable = (params) -> {
 				// From: HandsOn 04
 				// Connect to the control component
 				VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
 	 
 				// Select the first operation from the control component
-				proxy.setValue("status/opMode", RoboterControlComponent.OPMODE_LOAD);
+				proxy.setValue("status/opMode", RoboterControlComponent.OPMODE_LOAD_UNLOAD);
 	 
 				// Start the control component operation asynchronous
 				proxy.invokeOperation("/operations/service/start");
@@ -87,20 +87,7 @@ public class AssetASRoboter {
 					}
 				}
 				
-				
-				// Select the second operation from the control component
-				proxy.setValue("status/opMode", RoboterControlComponent.OPMODE_UNLOAD);
-	 
-				// Start the control component operation asynchronous
-				proxy.invokeOperation("/operations/service/start");
-	 
-				// Wait until the operation is completed
-				while (!proxy.getValue("status/exState").equals(ExecutionState.COMPLETE.getValue())) {
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-					}
-				}
+			
 	 
 				proxy.invokeOperation("operations/service/reset");
 				// Then return -> synchronous

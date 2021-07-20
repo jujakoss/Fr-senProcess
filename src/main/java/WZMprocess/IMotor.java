@@ -2,7 +2,7 @@ package WZMprocess;
 
 public interface IMotor {
 	
-	boolean readStatus();
+	boolean motorStatus();
 	
 	void activate();
 	
