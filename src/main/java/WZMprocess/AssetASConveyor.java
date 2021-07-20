@@ -1,7 +1,5 @@
 package WZMprocess;
 
-
-
 import java.util.Map;
 import java.util.function.Function;
 
@@ -50,8 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
-
 public class AssetASConveyor {
 	// Initializes a logger for the output
 	private static final Logger logger = LoggerFactory.getLogger(AssetASConveyor.class);
@@ -62,7 +58,7 @@ public class AssetASConveyor {
 		VABMapProvider ccProvider = new VABMapProvider(cc);
 		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
 		server.start();
-
+		System.out.println("Control Component server started");
 	}
 
 	public static void startMyAssetAdministrationShell(Conveyor conveyorOne) {
@@ -171,29 +167,27 @@ public class AssetASConveyor {
 		
 		// Register the VAB model at the directory ''local''
 		
-		AASDescriptor aasDescriptor = new AASDescriptor(aas, "http://localhost:4000/handson/wzm/aas");
+		AASDescriptor aasDescriptor = new AASDescriptor(aas, "http://localhost:4000/wzm/wzm/aas");
 		
 		// Explicitly create and add submodel descriptors
-		SubmodelDescriptor sensorSMDescriptor = new SubmodelDescriptor(sensorSubModel, "http://localhost:4000/handson/conveyor/aas/submodels/Sensor");
-		SubmodelDescriptor motorSMDescriptor = new SubmodelDescriptor(motorSubModel, "http://localhost:4000/handson/conveyor/aas/submodels/Control");
+		SubmodelDescriptor sensorSMDescriptor = new SubmodelDescriptor(sensorSubModel, "http://localhost:4000/wzm/conveyor/aas/submodels/Sensor");
+		SubmodelDescriptor motorSMDescriptor = new SubmodelDescriptor(motorSubModel, "http://localhost:4000/wzm/conveyor/aas/submodels/Control");
 		aasDescriptor.addSubmodelDescriptor(sensorSMDescriptor);
 		aasDescriptor.addSubmodelDescriptor(motorSMDescriptor);
 		registry.register(aasDescriptor);
 		
 		// Deploying the AAS on a HTTP server
 		
-		BaSyxContext context = new BaSyxContext("/handson", "", "localhost", 4000);
+		BaSyxContext context = new BaSyxContext("/wzm", "", "localhost", 4000);
 		context.addServletMapping("/wzm/*", aasServlet);
 		context.addServletMapping("/registry/*", registryServlet);
 		BaSyxHTTPServer httpServer = new BaSyxHTTPServer(context);
 		
 		//start server
 		httpServer.start();
-
+		System.out.println("AAS server started");
 	}
 
-	
-	
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -221,14 +215,9 @@ public class AssetASConveyor {
 		IProperty stateProperty = properties.get("currentState");
 		double state = (double) stateProperty.getValue();
 		
-		logger.info("The Server has started , the current stateof the sensor is " + state );
-		
+		logger.info("The Server has started , the current state of the sensor is " + state );
 	}
-	
-	
-	
 
-	
 // - AAS: http://localhost:4000/wzm/conveyor/aas/
 // - Sensor Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Sensor/
 // - Control(Motor) Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Control/
