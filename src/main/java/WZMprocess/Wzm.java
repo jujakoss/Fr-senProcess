@@ -8,7 +8,7 @@ public class Wzm implements Iwzm {
 	public void executeService() {
 		// testing Fräsen Operation as an excuted service
 		try {
-			//random testing scenario 
+			// random testing scenario
 			state = State.WORKING;
 			Thread.sleep(1000);
 			state = State.READY;

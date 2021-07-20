@@ -8,64 +8,64 @@ import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class btControlComponent  extends SimpleControlComponent implements ControlComponentChangeListener  {
+public class btControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
 	private static final long serialVersionUID = 1L;
-    private static final Logger logger = LoggerFactory.getLogger(btControlComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(btControlComponent.class);
 
-public static final String OPMODE_BASIC = "BSTATE";
-public static final String OPMODE_OP = "OP"; 
+	public static final String OPMODE_BASIC = "BSTATE";
+	public static final String OPMODE_OP = "OP";
 
-private Bauteil bauteil;
+	private Bauteil bauteil;
 
-public btControlComponent(Bauteil bauteil) {
-	this.bauteil = bauteil;
-	addControlComponentChangeListener(this);
-}
+	public btControlComponent(Bauteil bauteil) {
+		this.bauteil = bauteil;
+		addControlComponentChangeListener(this);
+	}
 
-@Override
-public void onChangedExecutionState(ExecutionState newExecutionState) {
-	logger.info("bauteilControlComponent: new execution state: " + newExecutionState);
-	if (newExecutionState == ExecutionState.EXECUTE) {
-		if (this.getOperationMode().equals(OPMODE_OP)) {
-			operation();
-		} else {
-			setExecutionState(ExecutionState.COMPLETE.getValue());
+	@Override
+	public void onChangedExecutionState(ExecutionState newExecutionState) {
+		logger.info("bauteilControlComponent: new execution state: " + newExecutionState);
+		if (newExecutionState == ExecutionState.EXECUTE) {
+			if (this.getOperationMode().equals(OPMODE_OP)) {
+				operation();
+			} else {
+				setExecutionState(ExecutionState.COMPLETE.getValue());
+			}
 		}
 	}
-}
 
-protected void operation() {
+	protected void operation() {
 
-/* operations */
-	
-}
+		/* operations */
 
-@Override
-public void onVariableChange(String varName, Object newValue) {
-}
+	}
 
-@Override
-public void onNewOccupier(String occupierId) {
-}
+	@Override
+	public void onVariableChange(String varName, Object newValue) {
+	}
 
-@Override
-public void onNewOccupationState(OccupationState state) {
-}
+	@Override
+	public void onNewOccupier(String occupierId) {
+	}
 
-@Override
-public void onChangedExecutionMode(ExecutionMode newExecutionMode) {
-}
+	@Override
+	public void onNewOccupationState(OccupationState state) {
+	}
 
-@Override
-public void onChangedOperationMode(String newOperationMode) {
-}
+	@Override
+	public void onChangedExecutionMode(ExecutionMode newExecutionMode) {
+	}
 
-@Override
-public void onChangedWorkState(String newWorkState) {
-}
+	@Override
+	public void onChangedOperationMode(String newOperationMode) {
+	}
 
-@Override
-public void onChangedErrorState(String newWorkState) {
-}
+	@Override
+	public void onChangedWorkState(String newWorkState) {
+	}
+
+	@Override
+	public void onChangedErrorState(String newWorkState) {
+	}
 
 }
