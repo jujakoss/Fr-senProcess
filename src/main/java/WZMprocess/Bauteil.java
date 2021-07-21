@@ -1,10 +1,16 @@
 package WZMprocess;
 
 public class Bauteil implements IBauteil {
-	
-	
-	
-	public Bauteil() {
 
+	private State state;
+
+	@Override
+	public void requestedService() {
 	}
+
+	@Override
+	public State getState() {
+		return state;
+	}
+
 }

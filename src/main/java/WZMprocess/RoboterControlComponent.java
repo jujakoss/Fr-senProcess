@@ -8,8 +8,6 @@ import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import WZMprocess.Conveyor;
-import WZMprocess.Wzm;
 
 public class RoboterControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
 	private static final long serialVersionUID = 1L;
@@ -21,6 +19,7 @@ public class RoboterControlComponent extends SimpleControlComponent implements C
 	private IRoboter roboter;
 	private IConveyor conveyor;
 	private Iwzm wzm;
+	private RoboterTask roboterTask;
 
 	public RoboterControlComponent(Roboter roboter) {
 		this.roboter = roboter;
@@ -48,11 +47,17 @@ public class RoboterControlComponent extends SimpleControlComponent implements C
 				if (conveyor.getSensor().readStatus() == true) {
 					roboter.getTask().load();
 					logger.info("Loading component");
+					break;
 				}
-
+			case FINISHED:
+				if (!roboterTask.readStatus()) {
+					roboter.getTask().unload();
+					break;}
+					
 			case WORKING:
 				if (conveyor.getSensor().readStatus() == true) {
 					logger.info("Machine tool is occupied");
+					break;
 				}
 
 			case OUT_OF_ORDER:

@@ -56,6 +56,8 @@ public class AssetASRoboter {
 		VABMapProvider ccProvider = new VABMapProvider(cc);
 		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
 		server.start();
+		System.out.println("Roboter Control Component server started");
+
 
 	}
 

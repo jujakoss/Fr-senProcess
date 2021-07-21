@@ -13,7 +13,7 @@ public class WzmControlComponent extends SimpleControlComponent implements Contr
 	private static final Logger logger = LoggerFactory.getLogger(WzmControlComponent.class);
 
 	public static final String OPMODE_BASIC = "BSTATE";
-	public static final String OPMODE_OP_EXE = "EXECUTE_SERVICE";
+	public static final String OPMODE_EXCUTE = "EXECUTE_SERVICE";
 
 	private Iwzm wzm;
 
@@ -26,7 +26,7 @@ public class WzmControlComponent extends SimpleControlComponent implements Contr
 	public void onChangedExecutionState(ExecutionState newExecutionState) {
 		logger.info("wzmControlComponent: new execution state: " + newExecutionState);
 		if (newExecutionState == ExecutionState.EXECUTE) {
-			if (this.getOperationMode().equals(OPMODE_OP_EXE)) {
+			if (this.getOperationMode().equals(OPMODE_EXCUTE)) {
 				wzm.executeService(); // Calls methode to excute the service needed
 			} else {
 				setExecutionState(ExecutionState.COMPLETE.getValue());

@@ -3,7 +3,7 @@ package WZMprocess;
 public interface Iwzm {
 
 	enum State {
-		OUT_OF_ORDER, READY, WORKING
+		READY, FINISHED, WORKING, OUT_OF_ORDER 
 	}
 
 	void executeService();
