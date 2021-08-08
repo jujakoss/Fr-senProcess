@@ -37,40 +37,24 @@ import org.eclipse.basyx.vab.protocol.http.server.BaSyxContext;
 import org.eclipse.basyx.vab.protocol.http.server.BaSyxHTTPServer;
 import org.eclipse.basyx.vab.protocol.http.server.VABHTTPInterface;
 
-/**
- * Now we actually create an oven AssetAdministrationShell (AAS) using the
- * standardized metamodel
- * 
- * The AAS will have two simple submodels: Sensor - submodel that represents the
- * temperature sensor of the oven Control - submodel for accessing the connected
- * control component via the AAS API
- * 
- * 
- * Expected output: - the Asset Administration Shell for the oven device is
- * accessible using the internet browser (because of the HTTP-REST interface
- * that is used in this HandsOn) - the Registry is accessible using the internet
- * browser (because of the HTTP-REST interface that is used in this HandsOn)
- */
 public class Scenario2 {
 	public static void main(String[] args) throws Exception {
 
 		Conveyor Conveyor1 = new Conveyor();
 		Roboter Roboter1 = new Roboter();
 		Wzm Wzm1 = new Wzm();
-
+		
 		startMyControlComponent(Roboter1, Conveyor1, Wzm1);
 		startMyAssetAdministrationShell(Roboter1, Conveyor1, Wzm1);
 	}
-
 	public static void startMyControlComponent(Roboter roboter, Conveyor conveyor, Wzm wzm) {
 		ControlComponent cc = new MyControlComponent(roboter, conveyor, wzm);
-
+		
 		VABMapProvider ccProvider = new VABMapProvider(cc);
-
+		
 		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
 		server.start();
 	}
-
 	public static void startMyAssetAdministrationShell(Roboter roboter, Conveyor conveyor, Wzm wzm) {
 
 		Submodel cSensorSubModel = new Submodel("CSensor", new ModelUrn("urn:org.eclipse.basyx:CSensorSubmodel"));
@@ -86,15 +70,13 @@ public class Scenario2 {
 		Submodel rMotorSubModel = new Submodel("RMotor", new ModelUrn("urn:org.eclipse.basyx:RMotorSubmodel"));
 		Submodel wzmServiceSubModel = new Submodel("Service", new ModelUrn("urn:org.eclipse.basyx:ServiceSubmodel"));
 
-		Asset conveyorAsset = new Asset("conveyorAsset", new ModelUrn("urn:org.eclipse.basyx:ConveyorAsset"),
-				AssetKind.INSTANCE);
-		Asset roboterAsset = new Asset("roboterAsset", new ModelUrn("urn:org.eclipse.basyx:RoboterAsset"),
-				AssetKind.INSTANCE);
+		Asset conveyorAsset = new Asset("conveyorAsset", new ModelUrn("urn:org.eclipse.basyx:ConveyorAsset"), AssetKind.INSTANCE);
+		Asset roboterAsset = new Asset("roboterAsset", new ModelUrn("urn:org.eclipse.basyx:RoboterAsset"), AssetKind.INSTANCE);
 		Asset wzmAsset = new Asset("wzmAsset", new ModelUrn("urn:org.eclipse.basyx:WzmAsset"), AssetKind.INSTANCE);
-
+		
 		ModelUrn conveyorAasURN = new ModelUrn("urn:org.eclipse.basyx:ConveyorAsset");
 		AssetAdministrationShell conveyorAas = new AssetAdministrationShell("conveyor", conveyorAasURN, conveyorAsset);
-
+		
 		AASModelProvider conveyorAasProvider = new AASModelProvider(conveyorAas);
 		SubmodelProvider cSensorSMProvider = new SubmodelProvider(cSensorSubModel);
 		SubmodelProvider cMotorSMProvider = new SubmodelProvider(cMotorSubModel);
@@ -102,69 +84,66 @@ public class Scenario2 {
 		conveyorFullProvider.setAssetAdministrationShell(conveyorAasProvider);
 		conveyorFullProvider.addSubmodel(cSensorSMProvider);
 		conveyorFullProvider.addSubmodel(cMotorSMProvider);
-
+		
 		ModelUrn roboterAasURN = new ModelUrn("urn:org.eclipse.basyx:RoboterAsset");
 		AssetAdministrationShell roboterAas = new AssetAdministrationShell("roboter", roboterAasURN, roboterAsset);
-
+		
 		AASModelProvider roboterAasProvider = new AASModelProvider(roboterAas);
 		SubmodelProvider rMotorSMProvider = new SubmodelProvider(rMotorSubModel);
 		MultiSubmodelProvider roboterFullProvider = new MultiSubmodelProvider();
 		roboterFullProvider.setAssetAdministrationShell(roboterAasProvider);
 		roboterFullProvider.addSubmodel(rMotorSMProvider);
-
+		
 		ModelUrn wzmAasURN = new ModelUrn("urn:org.eclipse.basyx:WzmAsset");
 		AssetAdministrationShell wzmAas = new AssetAdministrationShell("conveyor", wzmAasURN, wzmAsset);
-
+		
 		AASModelProvider wzmAasProvider = new AASModelProvider(wzmAas);
 		SubmodelProvider wzmServiceSMProvider = new SubmodelProvider(wzmServiceSubModel);
 		MultiSubmodelProvider wzmFullProvider = new MultiSubmodelProvider();
 		wzmFullProvider.setAssetAdministrationShell(wzmAasProvider);
 		wzmFullProvider.addSubmodel(wzmServiceSMProvider);
-
+		
+		
 		HttpServlet conveyorAasServlet = new VABHTTPInterface<IModelProvider>(conveyorFullProvider);
 		HttpServlet roboterAasServlet = new VABHTTPInterface<IModelProvider>(roboterFullProvider);
 		HttpServlet wzmAasServlet = new VABHTTPInterface<IModelProvider>(wzmFullProvider);
-
+ 
 		IAASRegistry registry = new InMemoryRegistry();
 		IModelProvider registryProvider = new AASRegistryModelProvider(registry);
 		HttpServlet registryServlet = new VABHTTPInterface<IModelProvider>(registryProvider);
-
+ 
 		conveyorAas.addSubmodel(cSensorSubModel);
 		conveyorAas.addSubmodel(cMotorSubModel);
 		roboterAas.addSubmodel(rMotorSubModel);
 		wzmAas.addSubmodel(wzmServiceSubModel);
-
-		AASDescriptor conveyorAasDescriptor = new AASDescriptor(conveyorAas,
-				"http://localhost:4000/handson/conveyor/aas");
-		SubmodelDescriptor cSensorSMDescriptor = new SubmodelDescriptor(cSensorSubModel,
-				"http://localhost:4000/handson/conveyor/aas/submodels/Sensor");
-		SubmodelDescriptor cMotorSMDescriptor = new SubmodelDescriptor(cMotorSubModel,
-				"http://localhost:4000/handson/conveyor/aas/submodels/RMotor");
+ 
+		AASDescriptor conveyorAasDescriptor = new AASDescriptor(conveyorAas, "http://localhost:4000/milling/conveyor/aas");
+		SubmodelDescriptor cSensorSMDescriptor = new SubmodelDescriptor(cSensorSubModel, "http://localhost:4000/milling/conveyor/aas/submodels/Sensor");
+		SubmodelDescriptor cMotorSMDescriptor = new SubmodelDescriptor(cMotorSubModel, "http://localhost:4000/milling/conveyor/aas/submodels/RMotor");
 		conveyorAasDescriptor.addSubmodelDescriptor(cSensorSMDescriptor);
 		conveyorAasDescriptor.addSubmodelDescriptor(cMotorSMDescriptor);
 		registry.register(conveyorAasDescriptor);
-
-		AASDescriptor roboterAasDescriptor = new AASDescriptor(conveyorAas,
-				"http://localhost:4000/handson/roboter/aas");
-		SubmodelDescriptor rMotorSMDescriptor = new SubmodelDescriptor(rMotorSubModel,
-				"http://localhost:4000/handson/roboter/aas/submodels/RMotor");
+		
+		 
+		AASDescriptor roboterAasDescriptor = new AASDescriptor(conveyorAas, "http://localhost:4000/milling/roboter/aas");
+		SubmodelDescriptor rMotorSMDescriptor = new SubmodelDescriptor(rMotorSubModel, "http://localhost:4000/milling/roboter/aas/submodels/RMotor");
 		roboterAasDescriptor.addSubmodelDescriptor(rMotorSMDescriptor);
 		registry.register(conveyorAasDescriptor);
-
-		AASDescriptor wzmAasDescriptor = new AASDescriptor(conveyorAas, "http://localhost:4000/handson/wzm/aas");
-		SubmodelDescriptor wzmServiceSMDescriptor = new SubmodelDescriptor(wzmServiceSubModel,
-				"http://localhost:4000/handson/wzm/aas/submodels/Service");
+		 
+		AASDescriptor wzmAasDescriptor = new AASDescriptor(conveyorAas, "http://localhost:4000/milling/wzm/aas");
+		SubmodelDescriptor wzmServiceSMDescriptor = new SubmodelDescriptor(wzmServiceSubModel, "http://localhost:4000/milling/wzm/aas/submodels/Service");
 		conveyorAasDescriptor.addSubmodelDescriptor(wzmServiceSMDescriptor);
 		registry.register(wzmAasDescriptor);
-
-		BaSyxContext context = new BaSyxContext("/handson", "", "localhost", 4000);
+		
+		
+		BaSyxContext context = new BaSyxContext("/milling", "", "localhost", 4000);
 		context.addServletMapping("/operation/*", conveyorAasServlet);
 		context.addServletMapping("/operation/*", roboterAasServlet);
 		context.addServletMapping("/operation/*", wzmAasServlet);
-
+		
 		context.addServletMapping("/registry/*", registryServlet);
 		BaSyxHTTPServer httpServer = new BaSyxHTTPServer(context);
-
+		
 		Function<Object[], Object> Invokable = (params) -> {
 			VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
 
@@ -176,16 +155,38 @@ public class Scenario2 {
 				} catch (InterruptedException e) {
 				}
 			}
-
+ 
 			proxy.invokeOperation("operations/service/reset");
 			return null;
 		};
-
+ 
 		Operation operation = new Operation("milling_operation");
 		operation.setInvokable(Invokable);
-
+ 
 		httpServer.start();
-
+ 
 	}
+	
+	/*- AAS: 
+			http://localhost:4000/milling/conveyor/aas/
+			http://localhost:4000/milling/roboter/aas/
+			http://localhost:4000/milling/wzm/aas/
+
+	- Submodels: 
+			
+			http://localhost:4000/milling/conveyor/aas/submodels/Sensor/
+			http://localhost:4000/milling/conveyor/aas/submodels/CMotor/
+			http://localhost:4000/milling/roboter/aas/submodels/RMotor/
+			http://localhost:4000/milling/wzm/aas/submodels/Service/
+
+	// - Show all AAS: http://localhost:4000/milling/registry/api/v1/registry/
+
+	// - Show particular AAS: 
+	 * 
+	 		http://localhost:4000/milling/registry/api/v1/registry/urn:org.eclipse.basyx:ConveyorAsset
+	 		http://localhost:4000/milling/registry/api/v1/registry/urn:org.eclipse.basyx:RoboterAsset
+	 		http://localhost:4000/milling/registry/api/v1/registry/urn:org.eclipse.basyx:WzmAsset
+
+	 */
 
 }

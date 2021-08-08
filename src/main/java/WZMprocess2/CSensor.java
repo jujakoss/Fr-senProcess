@@ -17,7 +17,7 @@ public class CSensor implements CSensorInterface {
 			int limit = 0;
 			for (limit = 0; limit < numberOfparts; limit++) { // 10 parts reach the sensor , one every 6 seconds
 				try {
-					Thread.sleep(6000);
+					Thread.sleep(6500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
