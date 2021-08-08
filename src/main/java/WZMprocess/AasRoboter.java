@@ -1,6 +1,5 @@
 package WZMprocess;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import javax.servlet.http.HttpServlet;
@@ -47,48 +46,36 @@ import org.eclipse.basyx.vab.protocol.http.server.VABHTTPInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AssetASConveyor {
+public class AasRoboter {
 	// Initializes a logger for the output
-	private static final Logger logger = LoggerFactory.getLogger(AssetASConveyor.class);
+	private static final Logger logger = LoggerFactory.getLogger(AasRoboter.class);
 
-	public static void startMyControlComponent(Conveyor conveyor) {
+	public static void startMyControlComponent(Roboter roboter) {
 
-		ControlComponent cc = new ConveyorControlComponent(conveyor);
+		ControlComponent cc = new RoboterControlComponent(roboter);
 		VABMapProvider ccProvider = new VABMapProvider(cc);
 		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
 		server.start();
-		System.out.println("Conveyor Control Component server started");
+		System.out.println("Roboter Control Component server started");
+
+
 	}
 
-	public static void startMyAssetAdministrationShell(Conveyor conveyorOne) {
+	public static void startMyAssetAdministrationShell(Roboter roboterOne) {
 
-		// ************************Sensor Submodel****************************
+		// *********************Action of the robotarm (Task)
+		// Submodel*********************
 
-		Submodel sensorSubModel = new Submodel("Sensor", new ModelUrn("urn:org.eclipse.basyx:SensorSubmodel"));
+		Submodel taskSubModel = new Submodel("Task", new ModelUrn("urn:org.eclipse.basyx:TaskSubmodel"));
 
-		// lambda property containing the current sensor state
-		Property stateProperty = new Property("currentState", ValueType.Boolean);
-		AASLambdaPropertyHelper.setLambdaValue(stateProperty, () -> {
-			return conveyorOne.getSensor().readStatus();
-		}, null);
-
-		// Adds a reference to a semantic ID to specify the property semantics
-		stateProperty.setSemanticId(
-				new Reference(new Key(KeyElements.PROPERTY, false, "0173-1#02-AAV232#002", KeyType.IRDI)));
-		sensorSubModel.addSubmodelElement(stateProperty);
-
-		// *********************Motor (Control) Submodel*********************
-
-		Submodel motorSubModel = new Submodel("Control", new ModelUrn("urn:org.eclipse.basyx:MotorSubmodel"));
-
-		// Create an operation that uses the control component to start/stop the
-		// conveyor
+		// Create an operation that uses the control component to move the roboter
 		Function<Object[], Object> opInvokable = (params) -> {
+			// From: HandsOn 04
 			// Connect to the control component
 			VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
 
-			// Select the operation from the control component
-			proxy.setValue("status/opMode", ConveyorControlComponent.OPMODE_SENSOR);
+			// Select the first operation from the control component
+			proxy.setValue("status/opMode", RoboterControlComponent.OPMODE_LOAD_UNLOAD);
 
 			// Start the control component operation asynchronous
 			proxy.invokeOperation("/operations/service/start");
@@ -108,13 +95,13 @@ public class AssetASConveyor {
 
 		// Create the Operations
 
-		Operation operationStart = new Operation("startConveyor");
+		Operation operationStart = new Operation("startRoboter");
 		operationStart.setInvokable(opInvokable);
-		motorSubModel.addSubmodelElement(operationStart);
+		taskSubModel.addSubmodelElement(operationStart);
 
-		Operation operationStop = new Operation("stopConveyor");
+		Operation operationStop = new Operation("stopRoboter");
 		operationStop.setInvokable(opInvokable);
-		motorSubModel.addSubmodelElement(operationStop);
+		taskSubModel.addSubmodelElement(operationStop);
 
 		// AAS Information
 
@@ -125,13 +112,11 @@ public class AssetASConveyor {
 		// Wraping the model in an IModelProvider (now specific to the AAS and submodel)
 
 		AASModelProvider aasProvider = new AASModelProvider(aas);
-		SubmodelProvider sensorSMProvider = new SubmodelProvider(sensorSubModel);
-		SubmodelProvider motorSMProvider = new SubmodelProvider(motorSubModel);
+		SubmodelProvider taskSMProvider = new SubmodelProvider(taskSubModel);
 
 		MultiSubmodelProvider fullProvider = new MultiSubmodelProvider();
 		fullProvider.setAssetAdministrationShell(aasProvider);
-		fullProvider.addSubmodel(sensorSMProvider);
-		fullProvider.addSubmodel(motorSMProvider);
+		fullProvider.addSubmodel(taskSMProvider);
 
 		// Deployment
 
@@ -146,41 +131,38 @@ public class AssetASConveyor {
 
 		// now add the references of the submodels to the AAS header
 
-		aas.addSubmodel(sensorSubModel);
-		aas.addSubmodel(motorSubModel);
+		aas.addSubmodel(taskSubModel);
 
 		// Register the VAB model at the directory ''local''
 
-		AASDescriptor aasDescriptor = new AASDescriptor(aas, "http://localhost:4000/wzm/wzm/aas");
+		AASDescriptor aasDescriptor = new AASDescriptor(aas, "http://localhost:4000/handson/wzm/aas");
 
 		// Explicitly create and add submodel descriptors
-		SubmodelDescriptor sensorSMDescriptor = new SubmodelDescriptor(sensorSubModel,
-				"http://localhost:4000/wzm/conveyor/aas/submodels/Sensor");
-		SubmodelDescriptor motorSMDescriptor = new SubmodelDescriptor(motorSubModel,
-				"http://localhost:4000/wzm/conveyor/aas/submodels/Control");
-		aasDescriptor.addSubmodelDescriptor(sensorSMDescriptor);
-		aasDescriptor.addSubmodelDescriptor(motorSMDescriptor);
+		SubmodelDescriptor taskSMDescriptor = new SubmodelDescriptor(taskSubModel,
+				"http://localhost:4000/handson/roboter/aas/submodels/Control");
+		aasDescriptor.addSubmodelDescriptor(taskSMDescriptor);
 		registry.register(aasDescriptor);
 
 		// Deploying the AAS on a HTTP server
 
-		BaSyxContext context = new BaSyxContext("/wzm", "", "localhost", 4000);
+		BaSyxContext context = new BaSyxContext("/handson", "", "localhost", 4000);
 		context.addServletMapping("/wzm/*", aasServlet);
 		context.addServletMapping("/registry/*", registryServlet);
 		BaSyxHTTPServer httpServer = new BaSyxHTTPServer(context);
 
 		// start server
 		httpServer.start();
-		System.out.println("AAS server started");
+
 	}
 
 	public static void main(String[] args) throws Exception {
 
-		Conveyor conveyorOne = new Conveyor();
-		startMyControlComponent(conveyorOne);
-		startMyAssetAdministrationShell(conveyorOne);
+		Roboter roboterOne = new Roboter();
+		startMyControlComponent(roboterOne);
+		startMyAssetAdministrationShell(roboterOne);
+
 		// Return a AASHTTPRegistryProxy for the registry on localhost at port 4000
-		IAASRegistry registry = new AASRegistryProxy("http://localhost:4000/wzm/registry");
+		IAASRegistry registry = new AASRegistryProxy("http://localhost:4000/handson/registry");
 
 		// Create a ConnectedAssetAdministrationShell using a
 		// ConnectedAssetAdministrationShellManager
@@ -188,27 +170,18 @@ public class AssetASConveyor {
 		ConnectedAssetAdministrationShellManager manager = new ConnectedAssetAdministrationShellManager(registry,
 				connectorFactory);
 
-		// The ID of the conveyor AAS
-		ModelUrn aasURN = new ModelUrn("urn:org.eclipse.basyx:ConveyorAAS");
+		// The ID of the roboter AAS
+		ModelUrn aasURN = new ModelUrn("urn:org.eclipse.basyx:RoboterAAS");
 		ConnectedAssetAdministrationShell connectedAAS = manager.retrieveAAS(aasURN);
 
-		// Connect to the AAS and read the current state of the sensor
-		// Either Create a connected property using the connected facades
-		Map<String, ISubmodel> submodels = connectedAAS.getSubmodels();
-		ISubmodel connectedSensorSM = submodels.get("Sensor");
-		Map<String, IProperty> properties = connectedSensorSM.getProperties();
-		IProperty stateProperty = properties.get("currentState");
-		double state = (double) stateProperty.getValue();
-
-		logger.info("The Server has started , the current state of the sensor is " + state);
 	}
 
-// - AAS: http://localhost:4000/wzm/conveyor/aas/
-// - Sensor Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Sensor/
-// - Control(Motor) Submodel: http://localhost:4000/wzm/conveyor/aas/submodels/Control/
-// - Show all AAS: http://localhost:4000/wzm/registry/api/v1/registry/
-// - Show my AAS: http://localhost:4000/wzm/registry/api/v1/registry/urn:org.eclipse.basyx:ConveyorAAS
+	// - AAS: http://localhost:4000/handson/roboter/aas/
+	// - Task Submodel: http://localhost:4000/handson/roboter/aas/submodels/Control/
+	// - Show all AAS: http://localhost:4000/handson/registry/api/v1/registry/
+	// - Show my AAS:
+	// http://localhost:4000/handson/registry/api/v1/registry/urn:org.eclipse.basyx:RoboterAAS
 
-// End of script
+	// End of script
 
 }

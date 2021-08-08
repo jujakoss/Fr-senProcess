@@ -1,23 +1,36 @@
 package WZMprocess;
 
+import org.eclipse.basyx.models.controlcomponent.ControlComponent;
 import org.eclipse.basyx.models.controlcomponent.ControlComponentChangeListener;
 import org.eclipse.basyx.models.controlcomponent.ExecutionMode;
 import org.eclipse.basyx.models.controlcomponent.ExecutionState;
 import org.eclipse.basyx.models.controlcomponent.OccupationState;
 import org.eclipse.basyx.models.controlcomponent.SimpleControlComponent;
+import org.eclipse.basyx.vab.modelprovider.api.IModelProvider;
+import org.eclipse.basyx.vab.modelprovider.map.VABMapProvider;
+import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class btControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
+public class BtControlComponent extends SimpleControlComponent implements ControlComponentChangeListener {
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(btControlComponent.class);
+	private static final Logger logger = LoggerFactory.getLogger(BtControlComponent.class);
 
 	public static final String OPMODE_BASIC = "BSTATE";
 	public static final String OPMODE_OP = "OP";
-
+	
 	private Bauteil bauteil;
+	
+	public static void startMyControlComponent(Bauteil bauteil) {
 
-	public btControlComponent(Bauteil bauteil) {
+		ControlComponent cc = new BtControlComponent(bauteil);
+		VABMapProvider ccProvider = new VABMapProvider(cc);
+		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
+		server.start();
+		System.out.println("Bauteil Control Component server started");
+	}
+
+	public BtControlComponent(Bauteil bauteil) {
 		this.bauteil = bauteil;
 		addControlComponentChangeListener(this);
 	}
