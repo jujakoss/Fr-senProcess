@@ -41,14 +41,14 @@ public class MyControlComponent extends SimpleControlComponent implements Contro
 
 	protected void processSequence() {
 		new Thread(() -> {
-			
-			for (int i = 0; i < 500; i++) {
-				
+
+			for (int i = 0; i < 20; i++) { // time of the test process in seconds
+
 				if (!conveyor.getSensor().readState()) {
 					conveyor.getMotor().activate();
 
 				} else {
-					
+
 					conveyor.getMotor().deactivate();
 
 					roboter.getTask().loadPart();
@@ -58,16 +58,16 @@ public class MyControlComponent extends SimpleControlComponent implements Contro
 					wzm.getService().applyService();
 
 					roboter.getTask().unloadPart();
-					
+
 				}
 				try {
-					Thread.sleep(100);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
 			}
-			
+
 			System.out.println("_____________");
 			conveyor.getMotor().deactivate();
 			setExecutionState(ExecutionState.COMPLETE.getValue());

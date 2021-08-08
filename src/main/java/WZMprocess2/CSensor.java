@@ -11,13 +11,13 @@ public class CSensor implements CSensorInterface {
 
 // here the sensor should be stimulated multiple times for test
 
-		int numberOfparts = 5;
+		int numberOfparts = 10;
 
 		new Thread(() -> {
 			int limit = 0;
-			for (limit = 0; limit < numberOfparts; limit++) {
+			for (limit = 0; limit < numberOfparts; limit++) { // 10 parts reach the sensor , one every 6 seconds
 				try {
-					Thread.sleep(4000);
+					Thread.sleep(6000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

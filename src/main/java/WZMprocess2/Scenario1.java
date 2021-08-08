@@ -30,9 +30,9 @@ public class Scenario1 {
 		proxy.invokeOperation("OPERATIONS/START");
 
 		logger.info("Using the control component to start the control of the conveyor");
-		
-		for (int i = 0; i < 500; i++) {
-			Thread.sleep(1000);
+
+		for (int i = 0; i < 200; i++) { // checking state (once every 100 millisecond for 20 seconds)
+			Thread.sleep(100);
 			String currentState = (String) proxy.getValue("STATUS/EXST");
 			if (currentState.equals(ExecutionState.COMPLETE.getValue())) {
 
@@ -40,9 +40,9 @@ public class Scenario1 {
 				break;
 			}
 		}
-		
+
 	}
-	
+
 	public static void startMyControlComponent(Roboter roboter, Conveyor conveyor, Wzm wzm) {
 		ControlComponent cc = new MyControlComponent(roboter, conveyor, wzm);
 		VABMapProvider ccProvider = new VABMapProvider(cc);
