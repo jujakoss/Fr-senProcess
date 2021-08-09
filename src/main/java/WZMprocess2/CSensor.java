@@ -24,8 +24,10 @@ public class CSensor implements CSensorInterface {
 				if (limit % 2 == 0) {
 					logger.info("Part reached sensor ");
 					currentSensorState = true;
+					//System.out.println(limit);
 				}
 				else {
+					//System.out.println("test message3");
 					currentSensorState = false;
 				}
 			}

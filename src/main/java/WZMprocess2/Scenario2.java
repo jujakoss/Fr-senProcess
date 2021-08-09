@@ -36,29 +36,62 @@ import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.eclipse.basyx.vab.protocol.http.server.BaSyxContext;
 import org.eclipse.basyx.vab.protocol.http.server.BaSyxHTTPServer;
 import org.eclipse.basyx.vab.protocol.http.server.VABHTTPInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Scenario2 {
-	public static void main(String[] args) throws Exception {
+	private static final Logger logger = LoggerFactory.getLogger(Scenario2.class);
 
+	public static void main(String[] args) throws Exception {
+	
 		Conveyor Conveyor1 = new Conveyor();
 		Roboter Roboter1 = new Roboter();
 		Wzm Wzm1 = new Wzm();
-		
+
 		startMyControlComponent(Roboter1, Conveyor1, Wzm1);
 		startMyAssetAdministrationShell(Roboter1, Conveyor1, Wzm1);
+		
+		Submodel conveyorModel = Scenario1.createConveyorModel(new Conveyor());
+		IModelProvider conveyorModelProvider = new SubmodelProvider(conveyorModel);
+
+		Submodel roboterModel = Scenario1.createRoboterModel(new Roboter());
+		IModelProvider roboterModelProvider = new SubmodelProvider(roboterModel);
+		
+		Submodel wzmModel = Scenario1.createWzmModel(new Wzm());
+		IModelProvider wzmModelProvider = new SubmodelProvider(wzmModel);
+
+		BaSyxContext context = new BaSyxContext("/handson", "", "localhost", 4001);
+
+		HttpServlet model1Servlet = new VABHTTPInterface<IModelProvider>(conveyorModelProvider);
+		logger.info("Created a servlet for the roboter model");
+		HttpServlet model2Servlet = new VABHTTPInterface<IModelProvider>(roboterModelProvider);
+		logger.info("Created a servlet for the conveyor model");
+		HttpServlet model3Servlet = new VABHTTPInterface<IModelProvider>(wzmModelProvider);
+		logger.info("Created a servlet for the WZM model");
+
+		context.addServletMapping("/conveyor/*", model1Servlet);
+		context.addServletMapping("/roboter/*", model2Servlet);
+		context.addServletMapping("/wzm/*", model3Servlet);
+
+		BaSyxHTTPServer server = new BaSyxHTTPServer(context);
+		server.start();
+		logger.info("HTTP server started");
+		Thread.sleep(5000);
+		
 	}
 	public static void startMyControlComponent(Roboter roboter, Conveyor conveyor, Wzm wzm) {
+		
 		ControlComponent cc = new MyControlComponent(roboter, conveyor, wzm);
 		
 		VABMapProvider ccProvider = new VABMapProvider(cc);
 		
-		BaSyxTCPServer<IModelProvider> server = new BaSyxTCPServer<>(ccProvider, 4002);
-		server.start();
+		BaSyxTCPServer<IModelProvider> ccserver = new BaSyxTCPServer<>(ccProvider, 4002);
+		ccserver.start();
 	}
 	public static void startMyAssetAdministrationShell(Roboter roboter, Conveyor conveyor, Wzm wzm) {
 
 		Submodel cSensorSubModel = new Submodel("CSensor", new ModelUrn("urn:org.eclipse.basyx:CSensorSubmodel"));
-		Property CProperty = new Property("currentState", ValueType.Double);
+		Property CProperty = new Property("currentSensorState", ValueType.Double);
 		AASLambdaPropertyHelper.setLambdaValue(CProperty, () -> {
 			return conveyor.getSensor().readState();
 		}, null);
@@ -67,6 +100,14 @@ public class Scenario2 {
 		cSensorSubModel.addSubmodelElement(CProperty);
 
 		Submodel cMotorSubModel = new Submodel("CMotor", new ModelUrn("urn:org.eclipse.basyx:CMotorSubmodel"));
+		Property CProperty2 = new Property("currentSensorState", ValueType.Double);
+		AASLambdaPropertyHelper.setLambdaValue(CProperty2, () -> {
+			return conveyor.getMotor().isActive();
+		}, null);
+		CProperty.setSemanticId(
+				new Reference(new Key(KeyElements.PROPERTY, false, "0173-1#02-AAV232#002", KeyType.IRDI)));
+		cSensorSubModel.addSubmodelElement(CProperty2);
+		
 		Submodel rMotorSubModel = new Submodel("RMotor", new ModelUrn("urn:org.eclipse.basyx:RMotorSubmodel"));
 		Submodel wzmServiceSubModel = new Submodel("Service", new ModelUrn("urn:org.eclipse.basyx:ServiceSubmodel"));
 
@@ -119,7 +160,7 @@ public class Scenario2 {
  
 		AASDescriptor conveyorAasDescriptor = new AASDescriptor(conveyorAas, "http://localhost:4000/milling/conveyor/aas");
 		SubmodelDescriptor cSensorSMDescriptor = new SubmodelDescriptor(cSensorSubModel, "http://localhost:4000/milling/conveyor/aas/submodels/Sensor");
-		SubmodelDescriptor cMotorSMDescriptor = new SubmodelDescriptor(cMotorSubModel, "http://localhost:4000/milling/conveyor/aas/submodels/RMotor");
+		SubmodelDescriptor cMotorSMDescriptor = new SubmodelDescriptor(cMotorSubModel, "http://localhost:4000/milling/conveyor/aas/submodels/CMotor");
 		conveyorAasDescriptor.addSubmodelDescriptor(cSensorSMDescriptor);
 		conveyorAasDescriptor.addSubmodelDescriptor(cMotorSMDescriptor);
 		registry.register(conveyorAasDescriptor);
@@ -146,12 +187,11 @@ public class Scenario2 {
 		
 		Function<Object[], Object> Invokable = (params) -> {
 			VABElementProxy proxy = new VABElementProxy("", new JSONConnector(new BaSyxConnector("localhost", 4002)));
-
 			proxy.setValue("status/opMode", MyControlComponent.OP_MODE_MILLING);
 			proxy.invokeOperation("/operations/service/start");
 			while (!proxy.getValue("status/exState").equals(ExecutionState.COMPLETE.getValue())) {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 				}
 			}
