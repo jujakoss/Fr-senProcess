@@ -11,24 +11,6 @@ import org.eclipse.basyx.vab.protocol.basyx.server.BaSyxTCPServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The control component provides an additional abstraction for native device handling and has a specified interface.
- * It can also be connected to the virtual automation bus.
- * For more information on control components, see:
- * https://wiki.eclipse.org/BaSyx_/_Documentation_/_API_/_ControlComponent
- * 
- * There, the VAB API is specified:
- * https://wiki.eclipse.org/BaSyx_/_Documentation_/_API_/_ControlComponent#Virtual_Automation_Bus_.28VAB.29_implementation
- * 
- * In this HandsOn, a given control component for the virtual (proprietary) conveyor is utilized via the VAB.
- * 
- * Expected console output in this HandsOn:
- * - state outputs from the ConveyorControlComponent
- * - conveyor is activated and deactivated multiple times (not manually, but automatically using the control component this
- * time)
- * - temperature values at ~30
- * - the conveyor cooling down after the control component is finished
- */
 public class Scenario1CC {
 	// Initializes a logger for the output
 	private static final Logger logger = LoggerFactory.getLogger(Scenario1CC.class);

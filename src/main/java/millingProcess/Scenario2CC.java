@@ -34,22 +34,7 @@ import org.eclipse.basyx.vab.protocol.http.server.BaSyxContext;
 import org.eclipse.basyx.vab.protocol.http.server.BaSyxHTTPServer;
 import org.eclipse.basyx.vab.protocol.http.server.VABHTTPInterface;
 
-/** 
- * Now we actually create an conveyor AssetAdministrationShell (AAS) using the standardized metamodel
- * 
- * The AAS will have two simple submodels:
- * Sensor
- * - submodel that represents the temperature sensor of the conveyor
- * Control
- * - submodel for accessing the connected control component via the AAS API
- * 
- * 
- * Expected output:
- * - the Asset Administration Shell for the conveyor device is accessible using the internet browser (because of the
- * HTTP-REST interface that is used in this HandsOn)
- * - the Registry is accessible using the internet browser (because of the
- * HTTP-REST interface that is used in this HandsOn)
- */
+
 public class Scenario2CC {
 	public static void main(String[] args) throws Exception {
 		// Create and provide the control component from the previous HandsOn
@@ -59,9 +44,7 @@ public class Scenario2CC {
 	}
  
 	public static void startMyAssetAdministrationShell(Conveyor myConveyor) {
-		/**
-		 * Sensor Submodel
-		 */
+
 		Submodel sensorSubModel = new Submodel("Sensor", new ModelUrn("urn:org.eclipse.basyx:SensorSubmodel"));
 		// Create a lambda property containing the current sensor temperature
 		Property statusProperty = new Property("currentState", ValueType.Boolean);
@@ -74,9 +57,7 @@ public class Scenario2CC {
 				new Reference(new Key(KeyElements.PROPERTY, false, "0173-1#02-AAV232#002", KeyType.IRDI)));
 		sensorSubModel.addSubmodelElement(statusProperty);
  
-		/**
-		 * Control Submodel
-		 */
+
 		Submodel motorSubModel = new Submodel("Control", new ModelUrn("urn:org.eclipse.basyx:SensorSubmodel"));
 		// Create an operation that uses the control component to set conveyor on and off
 		Function<Object[], Object> opInvokable = (params) -> {
@@ -108,9 +89,7 @@ public class Scenario2CC {
 		operation.setInvokable(opInvokable);
 		motorSubModel.addSubmodelElement(operation);
  
-		/**
-		 * Minimal AAS Information
-		 */
+
  
 		Asset asset = new Asset("conveyorAsset", new ModelUrn("urn:org.eclipse.basyx:ConveyorAsset"), AssetKind.INSTANCE);
  
@@ -121,9 +100,7 @@ public class Scenario2CC {
 		// The header contains references to the previously created submodels.
 		// Here, the submodel endpoints are not yet known. They can be specified as soon as the real endpoints are known
  
-		/**
-		 * Again: Wrap the model in an IModelProvider (now specific to the AAS and submodel)
-		 */
+
 		// AASModelProvider and SubModelProvider implement the IModelProvider interface
 		AASModelProvider aasProvider = new AASModelProvider(aas);
 		SubmodelProvider sensorSMProvider = new SubmodelProvider(sensorSubModel);
@@ -138,9 +115,7 @@ public class Scenario2CC {
 		// Although the providers for aas/submodels implement the AAS API, they are still IModelProviders!
 		// IModelProvider aasIModelProvider = fullProvider;
  
-		/**
-		 * Deployment
-		 */
+
 		// Now, the IModelProvider is given to a HTTP servlet that gives access to the model in the next steps
 		// => The model will be published using an HTTP-REST interface
 		HttpServlet aasServlet = new VABHTTPInterface<IModelProvider>(fullProvider);
@@ -173,25 +148,6 @@ public class Scenario2CC {
 		httpServer.start();
 		
  
-		// Now in the browser, look at the various endpoints to see what is returned:
-		// - AAS: http://localhost:4000/handson/conveyor/aas/
-		// - Sensor Submodel: http://localhost:4000/handson/conveyor/aas/submodels/Sensor/
-		// - Control Submodel: http://localhost:4000/handson/conveyor/aas/submodels/Control/
- 
-		// Similar, the registry also has a HTTP-REST interface. So, it is possible to directly query it:
-		// - Show all AAS: http://localhost:4000/handson/registry/api/v1/registry/
-		// - Show my AAS: http://localhost:4000/handson/registry/api/v1/registry/urn:org.eclipse.basyx:ConveyorAAS
-		// Note: the "#" character in the URN s encoded as "%23"
- 
-		// The server can also be shut down:
-		/* 
-		try {
-			// Wait for 5s and then shutdown the server
-			Thread.sleep(5000);
-			httpServer.shutdown();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		*/
+
 	}
 }
